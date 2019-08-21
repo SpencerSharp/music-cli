@@ -1,19 +1,13 @@
 from .remote import *
 from .file import get_path
 import os, pandas as pd
-table_cols = {
-	'aliases': ['id', 'name', 'action'],
-	'queue'  : ['id'],
-	'artists': ['id', 'album_ids', 'name'],
-	'albums' : ['id', 'song_ids', 'name', 'rating'],
-	'songs'  : ['id', 'name', 'artist', 'genres', 'tags', 'rating'],
-	'genres' : ['id', 'parent_ids', 'name'],
-	'tags'   : ['id', 'parent_ids', 'name'],
-}
 rel_path = 'data'
 abs_path = get_path(rel_path)
-global tables
-tables = {}
+global data
+data = {}
+
+def get_path(table_name):
+	return abs_path + '/' + table_name
 
 def acquire_key():
 	global key
@@ -21,9 +15,6 @@ def acquire_key():
 
 def release_key():
 	key.close()
-
-def get_path(table_name):
-	return abs_path + '/' + table_name
 
 def init_table(table_name):
 	table = pd.DataFrame(columns=table_cols[table_name])

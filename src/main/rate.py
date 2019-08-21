@@ -1,5 +1,6 @@
 """
 Usage:
+	music rate -c <score>
     music rate [-dip] (-a|-s) <name>...
 
 Options:
@@ -18,6 +19,10 @@ from lib.spotify 	import get, search
 
 def rate():
 	args = docopt(__doc__)
+	if 		args['-c']:
+		type = 'song'
+		item = 
+
 	if 		args['-a']:
 		type   = 'album'
 	elif 	args['-s']:

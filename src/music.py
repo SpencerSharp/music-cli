@@ -13,6 +13,7 @@ Commands:
     music l|login
     music i|import
     music c|categorize
+    music t|tag
     music -q|--quit
     music -o|--options
     music -h|--help
