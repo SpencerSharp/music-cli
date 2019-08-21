@@ -1,25 +1,34 @@
 from .remote import *
-from .file import File
+from .file import get_path
 import os, pandas as pd
 table_cols = {
 	'aliases': ['id', 'name', 'action'],
 	'queue'  : ['id'],
 	'artists': ['id', 'album_ids', 'name'],
 	'albums' : ['id', 'song_ids', 'name', 'rating'],
-	'songs'  : ['id', 'name', 'rating', 'genres', 'tags'],
+	'songs'  : ['id', 'name', 'artist', 'genres', 'tags', 'rating'],
 	'genres' : ['id', 'parent_ids', 'name'],
 	'tags'   : ['id', 'parent_ids', 'name'],
 }
-rel_path = 'data/'
-abs_path = File.get_path(rel_path)
+rel_path = 'data'
+abs_path = get_path(rel_path)
 global tables
 tables = {}
 
+def acquire_key():
+	global key
+	key = open(abs_path + '.key', 'w')
+
+def release_key():
+	key.close()
+
 def get_path(table_name):
-	return abs_path + table_name
+	return abs_path + '/' + table_name
 
 def init_table(table_name):
-	table = pd.DataFrame(columns=table_cols[table_name]).to_json(get_path(table_name))
+	table = pd.DataFrame(columns=table_cols[table_name])
+	tables[table_name] = table
+	table.to_json(get_path(table_name))
 
 def load_table(table_name):
 	table = pd.read_json(get_path(table_name))
@@ -27,18 +36,21 @@ def load_table(table_name):
 	tables[table_name] = table
 
 def create_local():
+	acquire_key()
 	if not os.path.exists(abs_path):
 		os.mkdir(abs_path)
 	for table_name in table_cols.keys():
 		init_table(table_name)
 
+def load_from_local():
+	acquire_key()
+	for table_name in table_cols.keys():
+		load_table(table_name)
+
 def save_to_local():
 	for table_name in table_cols.keys():
 		tables[table_name].to_json(get_path(table_name))
-
-def load_from_local():
-	for table_name in table_cols.keys():
-		load_table(table_name)
+	release_key()
 
 def local_exists():
 	return os.path.exists(abs_path)
@@ -51,5 +63,5 @@ def load_data():
 		create_local()
 		set_remote()
 		push_to_remote()
-
-	load_from_local()
+	else:
+		load_from_local()

@@ -6,8 +6,10 @@ from .data import load_data
 from .spotify import get_spotify_permissions
 from .args import ArgsFile
 from .file import music_home
+from .monitor import does_monitor_exist, create_monitor
 
 def init_env():
+	# os.system('''trap 'val=$BASH_COMMAND && REGEX="^[0-9]{1,2}\.[0-9]$" && if [[ $val =~ $REGEX ]]; then echo $val && false; else true; fi' DEBUG''')
 	if not os.path.exists(music_home):
 		os.mkdir(music_home)
 	global args_file
@@ -15,14 +17,9 @@ def init_env():
 	args_file.delete()
 
 def init():
-	#if not does_runner_exist():
 	init_env()
 	get_spotify_permissions()
+	if not does_monitor_exist():
+		print('No monitor found')
+		create_monitor(os.getppid())
 	load_data()
-		# create_runner(perms, data)
-	# args_file = ArgsFile()
-	# if not is_runner():
-	# 	args_file.write_args(sys.argv)
-	# 	os.kill(get_runner_pid(), signal.SIGUSR1)
-	# 	sys.exit()
-	# args_file.read_args()

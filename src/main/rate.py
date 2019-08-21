@@ -1,44 +1,44 @@
 """
 Usage:
-    music rate [-di] (-a|-s) <name>...
+    music rate [-dip] (-a|-s) <name>...
 
 Options:
 	-a 		Album name
 	-s   	Song name
+	-p  	Pause
 	-d 		Use id instead of name
-	-i 		Interactive
+	-q 		Quiet
 """
-import os, sys
+import os, sys,signal
 import pandas as pd
 from docopt import docopt
 
 from lib.data 		import tables
-from lib.spotify 	import search
+from lib.spotify 	import get, search
 
 def rate():
 	args = docopt(__doc__)
-	name    = ' '.join(args['<name>'][:-1])
-	score   = round(float(args['<name>'][-1:][0]),1)
-	gave_id = args['-d']
-	if  	args['-a']:
-		rate_album(name,score,gave_id)
+	if 		args['-a']:
+		type   = 'album'
 	elif 	args['-s']:
-		rate_song(name,score,gave_id)
+		type   = 'song'
 
-def rate_album(album_name, score, gave_id):
-	if not gave_id:
-		album = search('album', album_name)
+	if      args['-d']:
+		id     = args['<name>'][0]
 	else:
-		album = get('album', album_name)
-	album.append(score)
-	tables['albums'].loc[album[0]] = pd.Series(index=['id', 'song_ids', 'name', 'rating'], data=album)
+		id    = search('album', ' '.join(args['<name>'][:-1]))
 
-def rate_song(song_name, score, gave_id):
-	if not gave_id:
-		song = search('track',song_name)
-	else:
-		song = get('track', song_name)
+	item = get(type, id)
+
+	score   = round(float(args['<name>'][-1:][0]),1)
+
+	rate_item(item, type, score)
+
+def rate_item(item, type, score):
+	item.append(score)
+	tables[type + 's'].loc[item[0]] = pd.Series(index=tables[type + 's'].columns, data=item)
 
 def fantano():
+
 	print('Did you love it, did you hate it, what would you rate it?')
 	

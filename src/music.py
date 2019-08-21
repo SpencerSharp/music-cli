@@ -5,6 +5,7 @@ Usage:
 
 Commands:
     music p|play
+    music m|me
     music q|queue
     music s|skip
     music a|alias
@@ -18,13 +19,15 @@ Commands:
     music -v|--version
 """
 
-import sys
+import sys, os, signal
 from docopt import docopt
 
 from lib.data import save_to_local
 from lib.init import init
+from lib.monitor import get_monitor_pid
 
 from main.rate import rate
+from main.me   import me
 
 def main():
     init()
@@ -34,7 +37,10 @@ def main():
         play()
     elif command ==     'RATE':
         rate()
+    elif command ==     'ME':
+        me()
     save_to_local()
+    os.kill(get_monitor_pid(), signal.SIGUSR1)
 
 if __name__ == '__main__':
     main()

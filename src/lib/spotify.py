@@ -1,4 +1,6 @@
+import signal
 import spotipy, spotipy.util as util
+import numpy as np
 
 client_key = 'b4847d3dd2464848bc7f1f34b04f9509'
 secret_key = '1ebd017edc044803906b36e81bd48cc3'
@@ -34,22 +36,52 @@ def to_local(data):
 	temp = []
 	if 'album_type' in data.keys():
 		temp.append(data['id'])
-		temp.append([track['id'] for track in data['tracks']['items']])
 		temp.append(data['name'])
+		temp.append([track['id'] for track in data['tracks']['items']])
+	else:
+		temp.append(data['id'])
+		temp.append(data['name'])
+		temp.append(data['artists'][0]['name'])
+		temp.append([])
+		temp.append([])
 	return temp
 
 def get(type, id):
 	if type == 'album':
 		data = spotify.album(id)
-	elif type == 'track':
+	elif type == 'song':
 		data = spotify.track(id)
 	return to_local(data)
+
+def waiting(a,b):
+	print("I'm awake")
+
+def pause():
+	signal.signal(signal.SIGUSR1, waiting)
+	spotify.pause_playback()
+	signal.pause()
+	spotify.start_playback()
+	signal.signal(signal.SIGUSR1, signal.SIG_IGN)
 
 def search(type, name):
 	search_results = spotify.search(type + ': ' + name, limit=1,type=type)
 	id = search_results[type + 's']['items'][0]['id']
-	return get(type,id)
+	return id
 
-def current_track():
+def current_track_name():
 	track = spotify.currently_playing()
-	print(track.keys())
+	if track != None:
+		track = track['item']['name']
+	return track
+
+def current_track_id():
+	track = spotify.currently_playing()
+	if track != None:
+		track = track['item']['id']
+	return track
+
+def current_album_name():
+	album = spotify.currently_playing()
+	if album != None:
+		album = album['item']['album']['name']
+	return album
