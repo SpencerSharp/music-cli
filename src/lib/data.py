@@ -17,10 +17,12 @@ def acquire_key():
 def release_key():
 	key.close()
 
+def save_data(item):
+	global data
+	data['songs'] = DataItem.save_item(data, 'song', item)
+
 def init_table(table_name):
-	print(table_name)
 	table = pd.DataFrame(columns=DataItem.get_fields(table_name))
-	print(table.index)
 	data[table_name] = table
 	table.to_json(get_path(table_name))
 

@@ -39,7 +39,6 @@ def get(type, id):
 		data = spotify.album(id)
 	elif type == 'song':
 		data = spotify.track(id)
-	print(data.keys())
 	return DataItem.create_item(type, 'spotify', data)
 
 def search(type, name):

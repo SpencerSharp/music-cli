@@ -11,10 +11,12 @@ from filesys.file import music_home
 from procs.monitor import does_monitor_exist, create_monitor, get_monitor_pid
 
 def init_env():
-	dynamic_rating_cmd =  '\nshopt -s extdebug'
+	dynamic_rating_cmd =  '''\n# Spools auto-inserted lines'''
+	dynamic_rating_cmd += '''\n# MUSIC'''
+	dynamic_rating_cmd += '''\nshopt -s extdebug'''
 	dynamic_rating_cmd += '''\ntrap 'val=$BASH_COMMAND && REGEX="^[0-9]{1,2}\.[0-9]$"'''
 	dynamic_rating_cmd += ''' && if [[ $val =~ $REGEX ]]; then python '''
-	dynamic_rating_cmd += '''/Users/spencersharp/Documents/Coding/Active/spools-music/src/music.py '''
+	dynamic_rating_cmd += '''$HOME/Documents/Coding/Active/spools/music/src/music.py '''
 	dynamic_rating_cmd += '''`cat $HOME/.spools/music/info.txt` $val && false; else true; '''
 	dynamic_rating_cmd += '''fi' DEBUG'''
 	bashrc = open(os.environ['HOME'] + '/.bashrc', 'r')
@@ -45,6 +47,8 @@ def alert():
 	if alert_pid != get_monitor_pid():
 		os.waitpid(alert_pid,0)
 		blocked.close()
+	else:
+		send_signal(alert_pid, signal.SIGUSR1)
 
 def init():
 	init_env()

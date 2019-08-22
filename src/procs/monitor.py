@@ -33,7 +33,6 @@ def create_monitor():
 	top_fork = os.fork()
 	if top_fork == 0:
 		signal.pause()
-		print('Top exiting',flush=True)
 		sys.exit()
 	signal.signal(signal.SIGUSR1, wake_on_signal_received)
 	blocked = open(music_home + 'monitor_block', 'w')

@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy  as np
 class DataItem(object):
 	child_map = {}
 
@@ -7,9 +8,9 @@ class DataItem(object):
 
 	def save_item(data, item_type, item):
 		table_name = type(item).__name__.lower() + 's'
-		#series = pd.Series(index=DataItem.get_fields(table_name,'internal'), data=item.get_as('array'))
-		series = pd.Series(data=item.get_as('array'))
-		return data[item_type + 's'].append(series, ignore_index=True)
+		cols = list(DataItem.get_fields(table_name))
+		series = pd.DataFrame(np.array(item.get_as('array')), index=[len(data[table_name])], columns=cols)
+		return data[table_name].append(series)
 
 	def create_item(type, map_type, item):
 		if item != None:

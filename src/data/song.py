@@ -57,7 +57,7 @@ class Song(DataItem):
 			exec(to_exec)
 
 	def get_as(self, map_type):
-		return [self.id, self.name, self.user_rating]
+		return np.array([[self.id, self.name, self.user_rating, []]])
 
 	def flag(self):
 		return '-s'

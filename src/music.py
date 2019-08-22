@@ -48,6 +48,8 @@ def main():
         imprt()
     elif command ==     'ME':
         me()
+    elif command ==     'BACKLOG':
+        backlog()
     elif command ==     'CATEGORIZE':
         categorize()
     elif command ==     'ALIAS':

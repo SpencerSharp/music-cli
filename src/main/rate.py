@@ -14,9 +14,11 @@ import os, sys,signal
 import pandas as pd
 from docopt import docopt
 
-from lib.data 		import data
+from lib.data 		import save_data
 from lib.spotify 	import get, search
 from data.dataitem  import DataItem
+
+
 
 def rate():
 	args = docopt(__doc__)
@@ -31,15 +33,14 @@ def rate():
 	else:
 		id    = search('album', ' '.join(args['<name>'][:-1]))
 
-	print(str(type) + ' ' + str(id))
 	if 		args['-c']:
 		item = spotify.current()
 	else:
 		item = get(type, id)
 
-	item.score = round(float(args['<name>'][-1:][0]),1)
+	item.user_rating = round(float(args['<name>'][-1:][0]),1)
 
-	data = DataItem.save_item(data, 'song', item)
+	save_data(item)
 
 	if(type=='album' and args['-d'] and not args['-q']):
 		fantano()

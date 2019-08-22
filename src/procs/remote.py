@@ -1,3 +1,5 @@
+api_url = 'https://api.github.com'
+
 def clone_remote():
 	return False 
 
