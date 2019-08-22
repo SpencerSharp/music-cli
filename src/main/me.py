@@ -11,7 +11,7 @@ Options:
 	-q 		Quiet
 """
 
-from lib.data 		import tables
+from lib.data 		import data
 
 def me():
-	print(tables['songs'])
+	print(data['songs'])

@@ -1,5 +1,6 @@
-from .remote import *
-from .file import get_path
+from procs.remote import remote_exists, sync_remote, set_remote, push_to_remote
+from filesys.file import get_path
+from data.dataitem import DataItem
 import os, pandas as pd
 rel_path = 'data'
 abs_path = get_path(rel_path)
@@ -17,30 +18,31 @@ def release_key():
 	key.close()
 
 def init_table(table_name):
-	table = pd.DataFrame(columns=table_cols[table_name])
-	tables[table_name] = table
+	print(table_name)
+	table = pd.DataFrame(columns=DataItem.get_fields(table_name))
+	print(table.index)
+	data[table_name] = table
 	table.to_json(get_path(table_name))
 
 def load_table(table_name):
 	table = pd.read_json(get_path(table_name))
-	table = table.set_index('id',drop=False)
-	tables[table_name] = table
+	data[table_name] = table
 
 def create_local():
 	acquire_key()
 	if not os.path.exists(abs_path):
 		os.mkdir(abs_path)
-	for table_name in table_cols.keys():
+	for table_name in DataItem.table_names():
 		init_table(table_name)
 
 def load_from_local():
 	acquire_key()
-	for table_name in table_cols.keys():
+	for table_name in DataItem.table_names():
 		load_table(table_name)
 
 def save_to_local():
-	for table_name in table_cols.keys():
-		tables[table_name].to_json(get_path(table_name))
+	for table_name in DataItem.table_names():
+		data[table_name].to_json(get_path(table_name))
 	release_key()
 
 def local_exists():

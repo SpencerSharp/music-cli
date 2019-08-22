@@ -1,4 +1,6 @@
-def Genre(object):
+from .dataitem import DataItem
+
+def Genre(DataItem):
 	id = 0
 	name = ''
 	subgenre_ids = []
@@ -7,3 +9,5 @@ def Genre(object):
 	parent_ids   = []
 	album_ids    = []
 	song_ids     = []
+
+DataItem.add_child(Genre,'genres')

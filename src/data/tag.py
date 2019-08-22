@@ -1,5 +1,7 @@
+from .dataitem import DataItem
+
 # Make "Favorite" a builtin tag
-def Tag(object):
+def Tag(DataItem):
 	id = 0
 	name = ''
 	subgenre_ids = []
@@ -8,3 +10,5 @@ def Tag(object):
 	parent_ids   = []
 	album_ids    = []
 	song_ids     = []
+
+DataItem.add_child(Tag,'tags')

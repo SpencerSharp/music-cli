@@ -1,27 +1,25 @@
 """
 Usage:
-	music rate -c <score>
-    music rate [-dip] (-a|-s) <name>...
+    music rate [-cdpq] (-a|-s) <name>...
 
 Options:
 	-a 		Album name
 	-s   	Song name
+	-c      Current song/album
+	-d 		Use spotify id instead of name
 	-p  	Pause
-	-d 		Use id instead of name
 	-q 		Quiet
 """
 import os, sys,signal
 import pandas as pd
 from docopt import docopt
 
-from lib.data 		import tables
+from lib.data 		import data
 from lib.spotify 	import get, search
+from data.dataitem  import DataItem
 
 def rate():
 	args = docopt(__doc__)
-	if 		args['-c']:
-		type = 'song'
-		item = 
 
 	if 		args['-a']:
 		type   = 'album'
@@ -33,17 +31,19 @@ def rate():
 	else:
 		id    = search('album', ' '.join(args['<name>'][:-1]))
 
-	item = get(type, id)
+	print(str(type) + ' ' + str(id))
+	if 		args['-c']:
+		item = spotify.current()
+	else:
+		item = get(type, id)
 
-	score   = round(float(args['<name>'][-1:][0]),1)
+	item.score = round(float(args['<name>'][-1:][0]),1)
 
-	rate_item(item, type, score)
+	data = DataItem.save_item(data, 'song', item)
 
-def rate_item(item, type, score):
-	item.append(score)
-	tables[type + 's'].loc[item[0]] = pd.Series(index=tables[type + 's'].columns, data=item)
+	if(type=='album' and args['-d'] and not args['-q']):
+		fantano()
 
 def fantano():
-
-	print('Did you love it, did you hate it, what would you rate it?')
+	print('\nDid you love it, did you hate it, what would you rate it?')
 	

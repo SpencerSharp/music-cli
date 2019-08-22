@@ -60,3 +60,14 @@
 # 		sys.exit()
 # 	set_runner_pid(os.getpid())
 # 	runner(perms, data)
+
+# export SPOTIPY_CLIENT_ID='b4847d3dd2464848bc7f1f34b04f9509'
+# export SPOTIPY_CLIENT_SECRET='1ebd017edc044803906b36e81bd48cc3'
+# export SPOTIPY_REDIRECT_URI='http://localhost:8888/callback/'
+# shopt -s extdebug
+# export SPOOLS_MUSIC_HOME='$HOME/.spools/music'
+# export SPOOLS_MUSIC_PATH='/Users/spencersharp/Documents/Coding/Active/spools-music/src/music.py'
+# export SPOOLS_MUSIC_ARGS='cat /Users/spencersharp/.spools/music/info.txt'
+# trap 'val=$BASH_COMMAND && REGEX="^[0-9]{1,2}\.[0-9]$" && if [[ $val =~ $REGEX ]]; then python $SPOOLS_MUSIC_PATH `$SPOOLS_MUSIC_ARGS` $val && false; else true; fi' debug
+
+# trap 'val=$BASH_COMMAND && REGEX="^[0-9]{1,2}\.[0-9]$" && if [[ $val =~ $REGEX ]]; then python $SPOOLS_MUSIC_PATH `$SPOOLS_MUSIC_ARGS` $val && false; else true; fi' DEBUG
