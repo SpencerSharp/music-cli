@@ -5,7 +5,7 @@ Usage:
     music play -a <album>
     music play -r <artist>
     music play -s <song>
-    music play new a|s [-t]
+    music play new
 
 Options:
 	-a 		Album name
@@ -15,26 +15,16 @@ Options:
 	-q 		Quiet
 """
 
-def play():
-    
-
 def play_new_album():
 	monitor.set_mode('album')
-    if queue.size() < 10:
-        albums = get_from_backlog('album', 10)
-        queue.add(albums)
-		queue.play()
-    else:
-        print('Please add more albums to your backlog')
-
+	if is_queue_empty():
+		print('Your queue is empty. Please add some albums or artists to your queue')
+	else:
+		queue.add_new_albums(5)
+		spotify.play_queue()
+    
 def play_new_singles():
 	monitor.set_mode('song')
-    if queue.size() < 100:
-        songs = get_from_backlog('song', 100)
-        queue.add(songs)
-        queue.play()
-    else:
-        print('Please add more songs to your backlog')
 
 def play_alias():
 

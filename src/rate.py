@@ -15,14 +15,15 @@ Options:
 	-p  	Pause
 	-q 		Quiet
 """
-# def rate():
+def rate():
+	item = MappableItem('user',sys.argv)
+	item.save()
+
+	if item is in albums:
+		fantano()
+
+
+
+def fantano():
+	print('\nDid you love it, did you hate it, what would you rate it?')
 	
-
-# 	if item is in albums:
-# 		fantano()
-
-
-
-# def fantano():
-# 	print('\nDid you love it, did you hate it, what would you rate it?')
-# 	
