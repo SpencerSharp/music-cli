@@ -11,11 +11,10 @@ from terminal import Terminal
 from env import SpoolsBashProfile
 import ipc
 import spotify
+from init import init
 
 
-os.system('rm -rf ~/.spools/test/music/*')
-spotify.get_spotify_permissions()
-
+init()
 runner = CLIRunnerDaemon()
 bash_profile = SpoolsBashProfile()
 bash_profile.add_cmd('export SPOOLS_RUNNER_DAEMON='+str(ipc.get_process_info(runner)[0]))

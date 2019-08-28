@@ -1,5 +1,5 @@
 import signal, os
-from file import File
+import file
 import ipc, filesys
 class Daemon(object):
     def get_input_file(self):
@@ -12,10 +12,14 @@ class Daemon(object):
         self.file = self.get_input_file()
         self.run = run
         self.signal = signal
+        
         if not ipc.check_if_process_exists(self):
-            if ipc.create_process(self.get_desc_file()):    
+            if ipc.create_process(self.get_desc_file(), self.critical):
                 ipc.set_handler(self, self.catch, signal)
                 self.sleep()
+
+    def critical(self):
+        filesys.write(file, str(os.getpid())+'\n0', overwrite=True)
 
     def catch(self):
         messages = self.read_messages()

@@ -7,7 +7,7 @@ def send_signal(pid, sig):
         except:
             raise
 
-def create_process(file):
+def create_process(file, critical):
     to_kill = os.fork()
     if to_kill == 0:
         signal.pause()
@@ -15,7 +15,7 @@ def create_process(file):
     if os.fork() == 0:
         if os.fork() != 0:
             sys.exit()
-        filesys.write(file, str(os.getpid())+'\n0', overwrite=True)
+        critical()
         send_signal(to_kill, signal.SIGUSR1)
         return True
     else:
@@ -27,6 +27,8 @@ def get_process_info(process):
     return int(details[0]),details[1]
 
 def check_if_process_exists(process):
+    if not filesys.does_exist(process.get_desc_file()):
+        return False
     pid,starttime = get_process_info(process)
     try:
         send_signal(pid,0)

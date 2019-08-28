@@ -1,18 +1,23 @@
-from daemon.monitor import create_monitor
-import env.bashrc.bashrc as bashrc
-from restapis.spotify import get_spotify_permissions
-from filesys.data.data import load_data
 import os
-def init_env():
-    if not os.path.exists('/Users/spencersharp/.spools/test/music'):
-        os.mkdir('/Users/spencersharp/.spools/test/music')
-    os.system('touch /Users/spencersharp/.spools/test/music/monitor_block')
-    bashrc.add_line('shopt -s extdebug')
-    get_spotify_permissions()
+import spotify
 
-    bashrc.add_cmd_regex_filter('music',"^[0-9]{1,2}\.[0-9]$")
+def init_filesys():
+    home = os.environ['HOME']
+    spools_home_path = '{HOME}/.spools'.format(HOME=home)
+    if not os.path.exists(spools_home_path):
+        os.mkdir(spools_home_path)
+    profile_home_path = '{}/test'.format(spools_home_path)
+    if not os.path.exists(profile_home_path):
+        os.mkdir(profile_home_path)
+    music_home_path = '{}/music'.format(profile_home_path)
+    if os.path.exists(music_home_path):
+        os.system('rm -rf {}'.format(music_home_path))
+    if not os.path.exists(music_home_path):
+        os.mkdir(music_home_path)
+
+def init_env():
+    print(spotify.get_token().url)
 
 def init():
+    init_filesys()
     init_env()
-    create_monitor()
-    load_data()
