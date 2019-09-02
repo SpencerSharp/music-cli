@@ -26,16 +26,13 @@ class ClassifierItem(DataItem):
 
 class MappableItem(DataItem):
     def __init__(self, param=None, map_type=None):
-        if param == None:
-            return None
         name = 'Song'
         start = lambda r: param.find(r)+len(r)+1
         arg = lambda s: param[start(s):(lambda x: start(s)+x if x >= 0 else len(param))(param[start(s):].find("-"))]
         things = 'for key,val in '+name+'''.field_maps[map_type].items():
             if map_type == 'user':
                 if key in param:
-                    exec('self.item = {}'.format(val))
-                    break
+                    exec('self.item{}'.format(val))
             else:
                 if type(val) == str:
                     val = 'param'+val
@@ -52,7 +49,6 @@ class MappableItem(DataItem):
     def get_values(self):
         fields = self.get_fields()
         results = []
-        print(fields)
         for field in fields:
             exec('results.append(self.{})'.format(field))
         return results
@@ -83,12 +79,11 @@ class Song(MappableItem):
     flag = '-s'
     field_maps = {
     'user':     {
-        '-r':   '(lambda z: z if (lambda y: y.user_rating = arg(key).split(" "))(z) == None)(self)',
-        '-s':   'Song(spotify.get_track_named(arg(Song.flag)), "spotify")',
-        '-d':   'Song(spotify.get_track(arg(Song.flag)),"spotify")',
-        '-c':   'Song(spotify.get_current_track(),"spotify")',
-        '-t':   '(lambda z: z if (lambda y: y.tag_ids = arg(key).split(" "))(z) == None)(self)',
-        '':     'Song(["","",np.nan],"array")'
+        '-s':   ' = Song(spotify.get_track_named(arg(key)), "spotify")',
+        '-d':   ' = Song(spotify.get_track(arg(key)),"spotify")',
+        '-c':   ' = Song(spotify.get_current_track(),"spotify")',
+        '-r':   '.user_rating = float(arg(key))',
+        '-t':   '.tags = arg(key).split(" ")'
         },
     'disk': {
         'id': '.id',

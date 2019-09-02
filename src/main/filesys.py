@@ -9,7 +9,9 @@ def write(file_name, message, overwrite=False):
 def read(file_name, overwrite=False, splitlines=False):
     file = File(file_name)
     text = file.read(overwrite)
-    return text.split('\n')
+    if(splitlines):
+        return text.split('\n')
+    return text
 
 def does_exist(file_name):
     return os.path.exists(get_path(file_name))

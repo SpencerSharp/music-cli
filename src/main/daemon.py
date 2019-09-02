@@ -19,7 +19,7 @@ class Daemon(object):
                 self.sleep()
 
     def critical(self):
-        filesys.write(file, str(os.getpid())+'\n0', overwrite=True)
+        filesys.write(self.get_desc_file(), str(os.getpid())+'\n0', overwrite=True)
 
     def catch(self):
         messages = self.read_messages()

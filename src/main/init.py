@@ -15,9 +15,5 @@ def init_filesys():
     if not os.path.exists(music_home_path):
         os.mkdir(music_home_path)
 
-def init_env():
-    print(spotify.get_token().url)
-
 def init():
     init_filesys()
-    init_env()

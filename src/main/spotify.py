@@ -1,7 +1,6 @@
-import os, signal, sys
-import webbrowser
+import os, signal, sys, time, logging, http.server, socketserver, json, datetime, webbrowser
 import requests
-import ipc
+import ipc, filesys
 
 client_key = 'b4847d3dd2464848bc7f1f34b04f9509'
 secret_key = '1ebd017edc044803906b36e81bd48cc3'
@@ -28,22 +27,46 @@ scopes     = [
 'playlist-modify-private']
 scope = ' '.join(scopes)
 
+def do_GET(request, client_address, self):
+    data = request.recv(1024).strip()
+    data_str = str(data)
+    data_str = data_str[data_str.find('code=')+5:]
+    user_code = data_str[:data_str.find('HTTP/1.1')-1]
+
+    params = {
+    'grant_type': 'authorization_code',
+    'code': user_code,
+    'redirect_uri': url,
+    'client_id': client_key,
+    'client_secret': secret_key
+    }
+    
+    result = requests.post('https://accounts.spotify.com/api/token',data=params)
+    res_dict = json.loads(result.text)
+    token = res_dict['access_token']
+    refresh_token = res_dict['refresh_token']
+    seconds_til_expiry = res_dict['expires_in']
+    refresh_time = datetime.datetime.strftime(datetime.datetime.now() + datetime.timedelta(seconds=int(seconds_til_expiry)),'%Y%m%d %H:%M:%S')
+
+    filesys.write('.token',token,overwrite=True)
+    filesys.write('.refresh',refresh_token,overwrite=True)
+    filesys.write('.refreshtime',refresh_time,overwrite=True)
+
+    sys.exit()
+
 def create_tcpserver(to_kill):
     import http.server
     import socketserver
 
     PORT = 8888
-    Handler = http.server.SimpleHTTPRequestHandler
+    Handler = do_GET
 
     with socketserver.TCPServer(("", PORT), Handler) as httpd:
         ipc.send_signal(to_kill, signal.SIGUSR1)
         req = httpd.handle_request()
-        print('reqd')
-        print(req)
-        print('reqd')
+        sys.exit()
 
-# TODO: Replace spotipy's authentication process with your own
-def get_token():
+def init_token():
     params = {
         'client_id': client_key,
         'response_type': 'code',
@@ -51,50 +74,91 @@ def get_token():
         'scope': scope,
         'show_dialog': False
     }
-    token = requests.get('https://accounts.spotify.com/authorize',params=params)
-    to_access = token.url
+    to_access = requests.get('https://accounts.spotify.com/authorize',params=params)
+
+    save_handler = signal.getsignal(signal.SIGUSR1)
+    signal.signal(signal.SIGUSR1, signal.SIG_DFL)
 
     to_kill = os.fork()
     if to_kill == 0:
-        print('wtfsir')
         signal.pause()
         sys.exit()
-    if os.fork() == 0:
+    tcpserver = os.fork()
+    if tcpserver == 0:
         create_tcpserver(to_kill)
         sys.exit()
     try:
         os.waitpid(to_kill, 0)
     except:
-        print('wait not good')
+        n = 2
+    callback = webbrowser.open(to_access.url)
+    try:
+        os.waitpid(tcpserver,0)
+    except:
+        n = 1
 
-    callback = webbrowser.open(to_access)
-    print('------')
-    print(callback.url)
-    print('------')
-    return token
+    signal.signal(signal.SIGUSR1, save_handler)
+
+# TODO: Replace spotipy's authentication process with your own
+def get_token():
+    if not filesys.does_exist('.token'):
+        init_token()
+    return filesys.read('.token')
+
+def api_put(url):
+    token = get_token()
+
+    headers = {'Authorization': 'Bearer ' + token}
+
+    requests.put(url, headers=headers)
+
+def api_get(url, data=None):
+    token = get_token()
+
+    headers = {'Authorization': 'Bearer ' + token}
+
+    if(data != None):
+        result = requests.get(url, json=data, headers=headers)
+    else:
+        result = requests.get(url,headers=headers)
+
+    try:
+        return json.loads(result.text)
+    except:
+        return None
 
 def get_track(id):
-    return spotify.track(id)
+    url_to_query = 'https://api.spotify.com/v1/tracks'
+    params = {'ids': [id]}
+    result = api_get(url_to_query, params)
+    return result
 
 def get_track_named(name):
-    val = spotify.search('tracks: ' + name, limit=1,type='track')
-    val = val['tracks']['items']
+    url = 'https://api.spotify.com/v1/search'
+    params = {
+    'q': name,
+    'type': 'track',
+    'limit': 1
+    }
+
+    result = api_get('https://api.spotify.com/v1/search',params)
+
+    if(result == None):
+        return None
+
+    val = result['tracks']['items']
     if len(val) == 0:
         return None
     return val[0]
 
 def current_track():
-    result = requests.get('https://api.spotify.com/v1/me/player/currently-playing')
-    print('wtfland')
-    print(result)
-    print('wtfland')
-    track = spotify.current_user_playing_track()
+    track = api_get('https://api.spotify.com/v1/me/player/currently-playing')
     if track == None:
         return track
     return track['item']
 
 def pause_player():
-    spotify.pause_playback()
+    api_put('https://api.spotify.com/v1/me/player/pause')
 
 def unpause_player():
-    spotify.start_playback()
+    api_put('https://api.spotify.com/v1/me/player/play')

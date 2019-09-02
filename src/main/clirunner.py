@@ -15,15 +15,16 @@ def is_cmd(msg):
     return re.match('^music.*',msg)
 
 def run_cmd(cmd):
-    print(cmd)
     if cmd == 'music save':
         data.save_tables()
-    elif cmd == 'music':
+    elif cmd == 'music.py':
         print(data.tables)
     else:
+        # try:
         item = MappableItem(cmd,'user').item
         if '-d' in cmd:
             spotify.unpause_player()
         print(item.__dict__)
         item.save()
-        data.save_tables()
+        # except:
+        #     print('You suck at this')
