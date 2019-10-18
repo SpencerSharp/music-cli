@@ -8,7 +8,7 @@ def get_path(file_name):
 class File(object):
 	does_exist = False
 
-	def __init__(self, name, mode='rw'):
+	def __init__(self, name, mode='w'):
 		self.path = get_path(name)
 		self.mode = mode
 
@@ -23,10 +23,6 @@ class File(object):
 		self.does_exist = True
 		self.open('x',close=True)
 
-	def delete(self):
-		if os.path.exists(self.path):
-			os.remove(self.path)
-
 	def write(self, text):
 		self.open()
 		self.file.write(text)
@@ -35,9 +31,7 @@ class File(object):
 	def read(self, remove=False):
 		self.open('r+')
 		text = self.file.read()
-		if remove:
-			self.delete()
-			self.file.close()
-			self.open('x')
 		self.file.close()
+		if remove:
+			self.write("")
 		return text

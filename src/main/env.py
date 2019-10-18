@@ -1,11 +1,10 @@
 import re
 import filesys
 class SpoolsBashProfile(object):
-    default_cmds = '''self.add_cmd('echo foolhardy plebeian')
-self.add_cmd('export SPOOLS_HOME=$HOME/.spools/test')
+    default_cmds = '''self.add_cmd('export SPOOLS_HOME=$HOME/.spools/test')
 self.add_cmd('shopt -s extdebug')
-self.add_cmd('export SPOOLS_RUNNER_DAEMON=$(head -n 1 ~/.spools/test/music/.CLIRunnerDaemon)')
-self.add_debug_trap('val=$BASH_COMMAND && REGEX="^[0-9]{1,2}\.[0-9].*" && if [[ $val =~ $REGEX ]]; then echo $val >> ~/.spools/test/music/CLIRunnerDaemon && kill -30 $SPOOLS_RUNNER_DAEMON && false; else true; fi')
+self.add_cmd('export SPOOLS_RUNNER_DAEMON=$(head -n 1 ~/.spools/test/music/.daemons/.CLIRunnerDaemon)')
+self.add_debug_trap('val=$BASH_COMMAND && REGEX="^[0-9]{1,2}\.[0-9].*" && if [[ $val =~ $REGEX ]]; then echo $val >> ~/.spools/test/music/.daemons/CLIRunnerDaemon && kill -30 $SPOOLS_RUNNER_DAEMON && false; else true; fi')
     '''
 
     cmd_map = {
@@ -27,7 +26,7 @@ self.add_debug_trap('val=$BASH_COMMAND && REGEX="^[0-9]{1,2}\.[0-9].*" && if [[ 
 
     def save(self):
         exec(SpoolsBashProfile.default_cmds)
-        self.cmds.insert(0,'#!/bin/bash')
+        self.cmds.insert(0,'#!/usr/bin/env bash')
         filesys.write('.bash','\n'.join(self.cmds),overwrite=True)
 
     def add_cmd(self,cmd,canadd=True):
@@ -45,7 +44,6 @@ self.add_debug_trap('val=$BASH_COMMAND && REGEX="^[0-9]{1,2}\.[0-9].*" && if [[ 
                 if '{}' in cmd:
                     x = re.sub(possible + ' ', '', cmd)
                     cmd = re.sub(possible,self.cmd_map[possible].format(x), cmd)
-                    print(cmd)
                 else:
                     cmd = re.sub(possible, self.cmd_map[possible], cmd)
         if canadd:

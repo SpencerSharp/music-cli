@@ -35,14 +35,15 @@ def do_GET(request, client_address, self):
 
     params = {
     'grant_type': 'authorization_code',
-    'code': user_code,
+    'code': code,
     'redirect_uri': url,
     'client_id': client_key,
     'client_secret': secret_key
     }
-    
+
     result = requests.post('https://accounts.spotify.com/api/token',data=params)
     res_dict = json.loads(result.text)
+    print(res_dict)
     token = res_dict['access_token']
     refresh_token = res_dict['refresh_token']
     seconds_til_expiry = res_dict['expires_in']
@@ -90,7 +91,7 @@ def init_token():
     try:
         os.waitpid(to_kill, 0)
     except:
-        n = 2
+        pass
     callback = webbrowser.open(to_access.url)
     try:
         os.waitpid(tcpserver,0)
@@ -103,6 +104,29 @@ def init_token():
 def get_token():
     if not filesys.does_exist('.token'):
         init_token()
+    elif filesys.does_exist('.refreshtime'):
+        cur_time = datetime.datetime.now()
+        expiry_time_str = filesys.read('.refreshtime')
+        expiry_time = datetime.datetime.strptime(expiry_time_str,'%Y%m%d %H:%M:%S')
+        if cur_time > expiry_time:
+            refresh_token = filesys.read('.refresh')
+            params = {
+                'grant_type': 'refresh_token',
+                'refresh_token': refresh_token,
+                'client_id': client_key,
+                'client_secret': secret_key
+            }
+            result = requests.post('https://accounts.spotify.com/api/token',data=params)
+            res_dict = json.loads(result.text)
+
+            token = res_dict['access_token']
+            seconds_til_expiry = res_dict['expires_in']
+
+            refresh_time = datetime.datetime.strftime(datetime.datetime.now() + datetime.timedelta(seconds=int(seconds_til_expiry)),'%Y%m%d %H:%M:%S')
+            filesys.write('.refreshtime',refresh_time,overwrite=True)
+            filesys.write('.token',token,overwrite=True)
+            if 'refresh_token' in res_dict.keys():
+                filesys.write('.refresh', res_dict['refresh_token'],overwrite=True)
     return filesys.read('.token')
 
 def api_put(url):
@@ -118,9 +142,25 @@ def api_get(url, data=None):
     headers = {'Authorization': 'Bearer ' + token}
 
     if(data != None):
-        result = requests.get(url, json=data, headers=headers)
+        result = requests.get(url, data=data, headers=headers)
     else:
         result = requests.get(url,headers=headers)
+        
+    try:
+        return json.loads(result.text)
+    except:
+        return None
+
+def api_post(url, data=None):
+    token = get_token()
+
+    headers = {'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json'}
+
+    if(data != None):
+        result = requests.get(url, json=data, headers=headers)
+    else:
+        result = requests.get(url, headers=headers)
+    print(result.__dict__)
 
     try:
         return json.loads(result.text)
@@ -128,9 +168,10 @@ def api_get(url, data=None):
         return None
 
 def get_track(id):
-    url_to_query = 'https://api.spotify.com/v1/tracks'
-    params = {'ids': [id]}
-    result = api_get(url_to_query, params)
+    url_to_query = 'https://api.spotify.com/v1/tracks/{}'
+    url_to_query = url_to_query.format(id[:-1])
+    result = api_get(url_to_query)
+    
     return result
 
 def get_track_named(name):
@@ -156,6 +197,25 @@ def current_track():
     if track == None:
         return track
     return track['item']
+
+def get_user_id():
+    url = 'https://api.spotify.com/v1/me'
+    response = api_get(url)
+    return response['id']
+
+def make_playlist(name):
+    base_url = 'https://api.spotify.com/v1/users/{}/playlists'
+    user_id = get_user_id()
+    print("userid is: " + user_id)
+    url = base_url.format(user_id)
+    params = {
+        'name': name
+    }
+    result = api_post(url, params)
+    print(result)
+    if result != None:
+        return result['id']
+    return result
 
 def pause_player():
     api_put('https://api.spotify.com/v1/me/player/pause')

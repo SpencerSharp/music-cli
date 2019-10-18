@@ -10,9 +10,6 @@ class DataItem(object):
     def save(self):
         data.save_item(self)
 
-    def as_row(self):
-        print(self.__dict__.keys())
-
     def equals(self, other):
         if other == None:
             return False
@@ -88,12 +85,14 @@ class Song(MappableItem):
     'disk': {
         'id': '.id',
         'name': '.name',
-        'user_rating': '.user_rating'
+        'user_rating': '.user_rating',
+        'tags': '.tags'
         },
     'array':    {
         'id': '[0]',
         'name': '[1]',
-        'user_rating': '[2]'
+        'user_rating': '[2]',
+        'tags': '[3]'
         },
     'spotify' : {
         'id': "['id']",
@@ -101,10 +100,11 @@ class Song(MappableItem):
         'artist_id': "['artists'][0]['id']",
         'artist_name': "['artists'][0]['name']",
         'album_id' : "['album']['id']",
-        'user_rating': np.nan
+        'user_rating': np.nan,
+        'tags': np.nan
         }
     }
-data.create_table(Song)
+
 
 class Album(MappableItem):
     flag = '-a'

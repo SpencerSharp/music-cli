@@ -21,7 +21,7 @@ class MonitorDaemon(Daemon):
     def monitor(self):
         while self.cur_state == None or self.cur_state.equals(self.prev_state):
             self.cur_state = self.get_state()
-            time.sleep(5)
+            time.sleep(0.1)
         self.state_action(self.prev_state, self.cur_state)
         self.prev_state = self.cur_state
         self.monitor()
@@ -43,6 +43,7 @@ class SpotifyMonitorDaemon(MonitorDaemon):
 
     def state_action(self, prev, cur):
         if prev != None and cur != None:
-            print('\nPlease rate "{0}" by {1}: '.format(prev.name, prev.artist_name), end='')
+            sub = "\nIf you'd like to add tags, follow your rating with -t then a space separated list of tags\n"
+            print('{2}Please rate "{0}" by {1}: '.format(prev.name, prev.artist_name, sub), end='')
             ipc.send_message_to(CLIRunnerDaemon(),'music rate -d {} -r '.format(prev.id),False)
             spotify.pause_player()

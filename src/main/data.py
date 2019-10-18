@@ -1,11 +1,19 @@
 import os
 import file
 import pandas as pd
-tables = {}
 
 def set_tables(new_tables):
     global tables
     tables = new_tables
+    return tables
+
+try:
+    n = tables.keys()
+except:
+    set_tables({'songs': pd.DataFrame()})
+
+def get_tables():
+    return tables
 
 def get_table_name(item):
     if type(item) != type:
@@ -15,7 +23,6 @@ def get_table_name(item):
 def create_table(item):
     table_name = get_table_name(item)
     tables[table_name] = pd.DataFrame()
-    set_tables(tables)
 
 def save_tables():
     for table_name, table in tables.items():
@@ -23,21 +30,19 @@ def save_tables():
 
 def load_tables():
     to_create = []
+    new_tables = {}
     for table_name, table in tables.items():
         json_file = file.get_path(table_name)
         if os.path.exists(json_file):
-            tables[table_name] = pd.read_json(file.get_path(table_name))
+            new_tables[table_name] = pd.read_json(file.get_path(table_name))
         else:
             to_create.append(table_name)
     for name in to_create:
-        tables[table_name] = pd.DataFrame()
-    set_tables(tables)
+        new_tables[table_name] = pd.DataFrame()
+    return set_tables(new_tables)
 
 def save_item(item):
     table_name = get_table_name(item)
     series = item.get_as('dataframe',len(tables[table_name]))
     tables[table_name] = tables[table_name].append(series)
-    set_tables(tables)
-
-def get_fields(table_name):
-    return DataItem.child_map[table_name].field_maps[type].keys()
+    save_tables()

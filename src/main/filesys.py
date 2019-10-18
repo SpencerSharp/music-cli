@@ -14,4 +14,5 @@ def read(file_name, overwrite=False, splitlines=False):
     return text
 
 def does_exist(file_name):
-    return os.path.exists(get_path(file_name))
+    path = get_path(file_name)
+    return os.path.exists(path)
